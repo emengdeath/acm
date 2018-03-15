@@ -1,0 +1,22 @@
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+using namespace std;
+int n;
+long long ans,s,f,g;
+int main(){
+	scanf("%d",&n);
+	if (n<4)printf("0");
+	else{
+		s=f=g=0;
+		for (int i=1;i<=n;i++){
+			g+=max((long long)0,f*(i-6));
+			f+=max((long long)0,s*(i-3));
+			s+=i;
+		}
+		ans=g*2;
+		s=f=g=0;
+		printf("%lld\n",ans);
+	}
+	return 0;
+}

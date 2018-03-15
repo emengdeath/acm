@@ -1,0 +1,39 @@
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#define N 1000000
+using namespace std;
+int a[N],b[N],c[N];
+int n,k,T;
+long long m;
+bool jian(int x){
+	int l=0;
+	long long s=0;
+	for (int i=1;i<=n;i++){
+		b[i]=b[i-1]+(a[i]>=x);
+		while (b[i]-b[l+1]>=k)l++;
+		if (b[i]-b[l]==k)s+=l+1;
+	}
+	return s>=m;
+}
+int main(){
+	freopen("b.in","r",stdin);
+	scanf("%d",&T);
+	while (T--){
+		scanf("%d %d %I64d",&n,&k,&m);
+		for (int i=1;i<=n;i++)
+			scanf("%d",&a[i]),c[i]=a[i];
+		sort(c+1,c+n+1);
+		c[0]=1;
+		for (int i=1;i<=n;i++)
+			if (c[c[0]]!=c[i])c[++c[0]]=c[i];
+		int l=1,r=c[0],s=l,mid;
+		while (l<=r){
+			if (jian(c[mid=(l+r)/2]))s=max(s,mid),l=mid+1;
+			else
+				r=mid-1;
+		}	
+		printf("%d\n",c[s]);
+	}
+	return 0;
+}

@@ -1,0 +1,84 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#include<cmath>
+using namespace std;
+struct point{
+	double x,y;
+	point(double X=0,double Y=0){x=X,y=Y;}
+	void read(){
+		scanf("%lf %lf",&x,&y);
+	}
+};
+struct line{
+	point s,t;
+	void read(){
+		s.read(),t.read();
+	}
+	bool on(point p){
+		if (s.x==t.x)
+			return min(s.y,t.y)<p.y&&max(s.y,t.y)>p.y;
+		return min(s.x,t.x)<p.x&&max(s.x,t.x)>p.x;
+	}
+}a,b;
+int T;
+point operator-(point a,point b){
+	return point(a.x-b.x,a.y-b.y);
+}
+point operator+(point a,point b){
+	return point(a.x+b.x,a.y+b.y);
+}
+point operator*(double a,point b){
+	return point(b.x*a,b.y*a);
+}
+point operator*(point b,double a){
+	return point(b.x*a,b.y*a);
+}
+point operator/(point a,double b){
+	return point(a.x/b,a.y/b);
+}
+bool operator==(point a,point b){
+	return a.x==b.x&&a.y==b.y;
+}
+double operator*(point a,point b){
+	return a.x*b.y-a.y*b.x;
+}
+double multi(point a,point b,point c){
+	return (b-a)*(c-a);
+}
+bool Across(line a,line b){
+	return (long long)multi(a.s,a.t,b.s)*multi(a.s,a.t,b.t)<=0&&(long long)multi(b.s,b.t,a.s)*multi(b.s,b.t,a.t)<=0;
+}
+double area(point a,point b,point c){
+	return fabs(multi(a,b,c));
+}
+point intersection(line a,line b){
+	return ((a.s-a.t)*(b.s*b.t)-(b.s-b.t)*(a.s*a.t))/((b.s-b.t)*(a.s-a.t));
+}
+int main(){
+	freopen("poj1269.in","r",stdin);
+	freopen("work.out","w",stdout);
+	scanf("%d",&T);
+	printf("INTERSECTING LINES OUTPUT\n");
+	while (T--){
+		a.read(),b.read();
+	/*	if (!Across(a,b))printf("NONE\n");
+		else
+			if (!multi(a.s,a.t,b.s)&&!multi(a.s,a.t,b.t)&&(a.on(b.s)||a.on(b.t)||b.on(a.s)||b.on(a.t)))printf("LINE\n");
+			else{
+				point c=intersection(a,b);
+				printf("POINT %.2f %.2f\n",c.x,c.y);
+			}*/
+		point A=a.t-a.s,B=b.t-b.s;
+		if (!(A*B)){
+			if (area(a.s,a.t,b.s)+area(a.s,a.t,b.t)==0)printf("LINE\n");
+			else
+			printf("NONE\n");
+		}else{
+			point c=intersection(a,b);
+			printf("POINT %.2f %.2f\n",c.x,c.y);
+		}
+	}
+	printf("END OF OUTPUT\n");
+	return 0;
+}

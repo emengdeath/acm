@@ -1,0 +1,12 @@
+#!/bin/bash
+while true; do
+    ./data
+    ./c
+    ./did
+    if diff c.out did.out; then
+        printf "AC\n"
+    else
+        printf "Wa\n"
+        exit 0
+    fi
+done

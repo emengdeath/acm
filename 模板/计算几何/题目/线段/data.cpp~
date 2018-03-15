@@ -1,0 +1,12 @@
+#include<cstdio>
+#include<algorithm>
+#include<iostream>
+#define N 10
+#include<ctime>
+#define random(x)(rand()%x)
+using namespace std;
+int T;
+int main(){
+	freopen("poj1269.in","w",stdout)l
+	return 0;
+}

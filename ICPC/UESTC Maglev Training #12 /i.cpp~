@@ -1,0 +1,40 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#include<cmath>
+using namespace std;
+struct point{
+	int x,y;
+	void read(){
+		scanf("%d %d",&x,&y);
+	}
+}a[2];
+int t[2];
+bool sig;
+double ans;
+int n,T;
+double sqr(double x){
+	return x*x;
+}
+double dis(point a,point b){
+	return sqrt(sqr(a.x-b.x)+sqr(a.y-b.y));
+}
+int main(){
+	freopen("i.in","r",stdin);
+	scanf("%d",&T);
+	while (T--){
+		scanf("%d",&n);
+		ans=0;
+		sig=0;
+		scanf("%d",&t[0]);
+		a[0].read();
+		while (--n){
+			sig^=1;
+			scanf("%d",&t[sig]);
+			a[sig].read();
+			ans=max(ans,dis(a[sig],a[sig^1])/(t[sig]-t[sig^1]))
+		}
+		printf("%.11f\n",ans);
+	}
+	return 0;
+}

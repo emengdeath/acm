@@ -1,0 +1,28 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#define N 1000001
+using namespace std;
+int f[N],g[N][10];
+int calc(int x){
+	int y=1;
+	while (x)y*=x%10,x/=10;
+	return y;
+}
+int main(){
+	for (int i=1;i<N;i++){
+		if (i<10)f[i]=i;
+		else
+			f[i]=f[calc(i)];
+		for (int j=1;j<=9;j++)	g[i][j]=g[i-1][j];
+		g[i][f[i]]++;
+	}
+	int n;
+	scanf("%d",&n);
+	while (n--){
+		int l,r,k;
+		scanf("%d %d %d",&l,&r,&k);
+		printf("%d\n",g[r][k]-g[l-1][k]);
+	}
+	return 0;
+}

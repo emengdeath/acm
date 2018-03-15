@@ -1,0 +1,80 @@
+#include<cstdio>
+#include<algorithm>
+#include<iostream>
+#define N 1000001
+using namespace std;
+int n,m,sum,top;
+bool instack[N],draw[N];
+int f[N][2];
+int stack[N],ans[N],d[N];
+int dfn[N],low[N],g[N],a[N][2];
+void ins(int x,int y){
+	a[++sum][0]=y,a[sum][1]=g[x],g[x]=sum;
+}
+void dfs(int x){
+	static int calc=0;
+	dfn[x]=low[x]=++calc,stack[++stack[0]]=x,instack[x]=1;
+	for (int i=g[x];i;i=a[i][1])
+		if (!dfn[a[i][0]]){
+			dfs(a[i][0]);
+			low[x]=min(low[x],low[a[i][0]]);
+		}else
+			if (instack[a[i][0]])
+				low[x]=min(low[x],dfn[a[i][0]]);
+	if (low[x]==dfn[x]){
+		++top;
+		do{
+			instack[stack[stack[0]]]=0;
+			draw[stack[stack[0]--]]=1;
+		}while (stack[stack[0]+1]!=x);
+	}
+}
+int main(){
+	scanf("%d %d",&n,&m);
+	for (int i=1;i<=n;i++){
+		int x;
+		scanf("%d",&x);
+		if (!x){
+			f[i][0]=-1;
+		}else{
+			while (x--){
+				int y;
+				scanf("%d",&y);
+				ins(y,i);
+			}
+		}
+	}
+	for (int i=1;i<=n;i++)
+		if (!dfn[i])dfs(i);
+	for (int i=1;i<=n;i++)
+		if (f[i][0]||f[i][1]||draw[i])d[++d[0]]=i;
+	for (int i=1;i<=d[0];i++){
+		for (int j=g[d[i]];j;j=a[j][1]){
+			if (f[d[i]][0]&&!f[a[j][0]][1]){
+				f[a[j][0]][1]=d[i];
+				d[++d[0]]=a[j][0];
+			}
+			if (f[d[i]][1]&&!f[a[j][0]][0]){
+				f[a[j][0]][0]=d[i];
+				d[++d[0]]=a[j][0];
+			}
+			if (draw[d[i]]&&!draw[a[j][0]]){
+				draw[a[j][0]]=1;
+				d[++d[0]]=a[j][0];
+			}
+		}
+	}
+	int s;
+	scanf("%d",&s);
+	if (f[s][1]){
+		printf("Win\n");
+		bool sig=1;
+		while (s!=-1){
+			printf("%d ",s);
+			s=f[s][sig];
+			sig^=1;
+		}
+	}else
+		draw[s]?printf("Draw"):printf("Lose");
+	return 0;
+}

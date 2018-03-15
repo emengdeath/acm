@@ -1,0 +1,22 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#define N 200000
+using namespace std;
+int a[N],b[N],c[N];
+char s[N];
+int n,l,r;
+int main(){
+	scanf("%d",&n);
+	for (int i=1;i<=n;i++)scanf("%d",&a[i]);
+	scanf("%s",s+1);
+	l=-1e9,r=1e9;
+	for (int i=5;i<=n;i++)
+		if (s[i-1]=='1'&&s[i-2]=='1'&&s[i-3]=='1'&&s[i-4]=='1'&&s[i]=='0'){
+			r=min(r,min(a[i],min(a[i-1],min(a[i-2],min(a[i-3],a[i-4])))));
+		}else
+		if (s[i-1]=='0'&&s[i-2]=='0'&&s[i-3]=='0'&&s[i-4]=='0'&&s[i]=='1')
+			l=max(l,max(a[i],max(a[i-1],max(a[i-2],max(a[i-3],a[i-4])))));
+	printf("%d %d",l+1,r-1);
+	return 0;
+}

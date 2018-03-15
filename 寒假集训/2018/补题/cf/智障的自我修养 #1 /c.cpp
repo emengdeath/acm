@@ -1,0 +1,36 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#define N 200000
+using namespace std;
+int f[N*4],a[N*4];
+long long g[N],all;
+int n,k;
+void build(int l,int r,int s){
+	if (l==r){
+		f[s]=a[l];
+		return;
+	}
+	build(l,(l+r)/2,s+s),build((l+r)/2+1,r,s+s+1);
+	f[s]=min(f[s+s],f[s+s+1]);
+}
+int get(int l,int r,int s,int ll,int rr){
+	if (r<ll||rr<l)return 1e9;
+	if (ll<=l&&r<=rr)return f[s];
+	return min(get(l,(l+r)/2,s+s,ll,rr),get((l+r)/2+1,r,s+s+1,ll,rr));
+}
+int main(){
+	scanf("%d %d",&n,&k);
+	for (int i=1;i<=n;i++)scanf("%d",&a[i]);
+	build(1,n,1);
+	for (int i=1;i<=n;i++)
+		if (i<k){
+			g[i]=g[i-1]+a[i],all+=a[i];
+		}else{
+			all+=a[i];
+			g[i]=min(g[i-1]+a[i],g[i-k]+all-get(1,n,1,i-k+1,i));
+			all-=a[i-k+1];
+		}
+	printf("%I64d\n",g[n]);
+	return 0;
+}

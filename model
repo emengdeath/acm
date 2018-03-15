@@ -1,0 +1,751 @@
+gprof 查看热点：
+g++ -pg -g  -o test test.cc
+./test   //会生成gmon.out
+gprof ./test > prof.log
+2-SAT
+#include<cstdio>
+#include<algorithm>
+#include<iostream>
+#define N 1000001
+using namespace std;
+int n,m,sum,top;
+bool instack[N];
+int stack[N],ans[N];
+int dfn[N],low[N],in[N],g[N],a[N*6][2],gg[N],ggg[N],du[N],d[N];
+bool bz[N];
+void ins(int x,int y){
+	a[++sum][0]=y,a[sum][1]=g[x],g[x]=sum;
+}
+void ins1(int x,int y){
+	a[++sum][0]=y,a[sum][1]=gg[x],gg[x]=sum;
+}
+void ins2(int x,int y){
+	a[++sum][0]=y,a[sum][1]=ggg[x],ggg[x]=sum;
+}
+int op(int x){
+	return x<=n?x+n:x-n;
+}
+bool dfs(int x){
+	static int calc=0;
+	dfn[x]=low[x]=++calc,stack[++stack[0]]=x,instack[x]=1;
+	for (int i=g[x];i;i=a[i][1])
+		if (!dfn[a[i][0]]){
+			if (!dfs(a[i][0]))return 0;
+			low[x]=min(low[x],low[a[i][0]]);
+		}else
+			if (instack[a[i][0]])
+				low[x]=min(low[x],dfn[a[i][0]]);
+	if (low[x]==dfn[x]){
+		++top;
+		do{
+			instack[stack[stack[0]]]=0;
+			ins1(top,stack[stack[0]]);
+			if (in[op(stack[stack[0]])]==top)return 0;
+			in[stack[stack[0]--]]=top;
+		}while (stack[stack[0]+1]!=x);
+	}
+	return 1;
+}
+void work(){
+	static int l,r;
+	l=0,r=0;
+	for (int i=1;i<=top;i++)
+		if (!du[i])d[++r]=i;
+	while (l!=r){
+		l++;
+		if (bz[d[l]])continue;
+		for (int i=gg[d[l]];i;i=a[i][1]){
+			if (a[i][0]<=n)
+			ans[a[i][0]]=1;
+			bz[in[op(a[i][0])]]=1;
+		}
+		for (int i=ggg[d[l]];i;i=a[i][1])
+			if (!(--du[a[i][0]]))
+				d[++r]=a[i][0];
+	}
+}
+int main(){
+	scanf("%d %d",&m,&n);
+	sum=1;
+	for (int i=1;i<=m;i++){
+		int a,b,sa,sb;
+		scanf("%d %d %d %d",&a,&sa,&b,&sb);
+		if (sa==1){
+			if (sb==1)
+				ins(b+n,a),ins(a+n,b);
+			else
+				ins(b,a),ins(a+n,b+n);
+		}else
+			if (sb==1)
+				ins(b+n,a+n),ins(a,b);
+			else
+				ins(a,b+n),ins(b,a+n);
+	}
+	for (int i=1;i<=n+n;i++)
+		if (!dfn[i])
+			if (!dfs(i)){
+				printf("IMPOSSIBLE\n");
+				return 0;
+			}
+	for (int i=1;i<=top;i++)
+		for (int j=gg[i];j;j=a[j][1])
+			for (int k=g[a[j][0]];k;k=a[k][1])
+				if (in[a[k][0]]!=i)
+					ins2(in[a[k][0]],i),du[i]++;
+	work();
+	for (int i=1;i<=n;i++)
+		printf("%d\n",ans[i]);
+	return 0;
+}
+FFT：
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#include<cmath>
+#define N 1000000
+typedef long double LD;
+using namespace std;
+const LD pi=acos(-1);
+const LD eps=0.5;
+struct Z{LD x,y;Z(LD X=0,LD Y=0){x=X,y=Y;}};
+Z operator +(Z a,Z b){return Z(a.x+b.x,a.y+b.y);}
+Z operator -(Z a,Z b){return Z(a.x-b.x,a.y-b.y);}
+Z operator *(Z a,Z b){return Z(a.x*b.x-a.y*b.y,a.x*b.y+b.x*a.y);}
+Z a[N],b[N],tp[N],u,v,wi;
+int n,len;
+int bz[N],ap[N],bp[N],cp[N];
+void DFT(Z*a,int sig){
+	for (int i=0;i<len;i++)tp[bz[i]]=a[i];
+	for (int i=2,hal,j,k;i<=len;i<<=1)
+		for (hal=i>>1,j=0;j<hal;j++){
+			wi=Z(cos(j*pi*sig/hal),sin(j*pi*sig/hal));
+			for (k=j;k<len;k+=i){
+				u=tp[k];
+				v=tp[k+hal]*wi;
+				tp[k]=u+v;
+				tp[k+hal]=u-v;
+			}
+		}
+	for (int i=0;i<len;i++)a[i]=tp[i];
+}
+void FFT(int*ap,int*bp,int n,int*cp){
+	for (len=1;len<=n;len<<=1);
+	a[0]=b[0]=0;
+	for (int i=0;i<len;i++)a[i]=ap[i],b[i]=bp[i];
+	for (int i=0,j,k,l;i<len;bz[k]=i++)
+		for (j=i,k=0,l=1;l<len;l<<=1,j>>=1)k=(k<<1)+(j&1);
+	DFT(a,1),DFT(b,1);
+	for (int i=0;i<len;i++)a[i]=a[i]*b[i];
+	DFT(a,-1);
+	for (int i=0;i<=n;i++)cp[i]=int(a[i].x/LD(len)+eps);
+}
+NTT：
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#define N 300001
+using namespace std;
+typedef long long LL;
+const LL MOD=1004535809;
+const LL G=3;
+int n,len,bitr[N];
+LL wi,invl,u,v;
+LL w[N],ap[N],bp[N],tp[N],c[N],a[N],b[N];
+LL calc(LL x,LL y){
+	static LL s;
+	s=1;
+	while (y){
+		if (y&1)(s*=x)%=MOD;
+		(x*=x)%=MOD,y>>=1;
+	}
+	return s;
+}
+void set(int n){
+	for (len=1;len<=n;len<<=1);
+	invl=calc(len,MOD-2);
+	w[0]=1,w[1]=calc(G,(MOD-1)/len);
+	for (int i=0,j,k,l;i<len;bitr[j]=i++)
+		for (j=0,k=1,l=i;k<len;k<<=1,l>>=1)j=(j<<1)+(l&1);
+	for (int i=2;i<=len;i++)w[i]=w[i-1]*w[1]%MOD;
+}
+void dft(LL*a,bool sig){
+	for (int i=0;i<len;i++)tp[bitr[i]]=a[i];
+	for (int i=2,stp=len,cur,hal,j,k;i<=len;i<<=1){
+		stp>>=1,cur=sig?len:0,hal=i>>1;
+		for (j=0;j<hal;j++,sig?cur-=stp:cur+=stp)
+			for (k=j,wi=w[cur];k<len;k+=i){
+				u=tp[k],v=tp[k+hal]*wi%MOD;
+				tp[k]=(u+v)%MOD;
+				tp[k+hal]=(u-v+MOD)%MOD;
+			}
+	}
+	for (int i=0;i<len;i++)a[i]=tp[i];
+}
+void ntt(LL*ap,LL*bp,int n,LL*c){
+	set(n);
+	for (int i=0;i<len;i++)a[i]=ap[i],b[i]=bp[i];
+	dft(a,0),dft(b,0);
+	for (int i=0;i<len;i++)c[i]=a[i]*b[i]%MOD;
+	dft(c,1);
+	for (int i=0;i<len;i++)(c[i]*=invl)%=MOD;
+}
+差分表
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#define N 2002
+#define M 2000001
+#define MOD 1000000
+using namespace std;
+long long n,m,K,p,ans,gcd;
+long long f[N][N],d[N],a[N],b[M];
+void init(){
+	scanf("%lld %lld %lld %lld",&K,&n,&m,&p);
+}
+long long quick(long long x,long long y){
+	static long long s;
+	s=0;
+	while (y){
+		if (y&1)(s+=x)%=p;
+		(x+=x)%=p,y/=2;
+	}
+	return s;
+}
+long long pow(long long x,long long y){
+	static long long s;
+	s=1;
+	while (y){
+		if (y&1)s=quick(s,x);
+		x=quick(x,x),y/=2;
+	}
+	return s;
+}
+void pre(){
+	//修改f
+	for (int i=1;i<=K;i++)
+		f[0][i]=pow(i,K);
+	for (int i=1;i<=K;i++){
+		for (int j=i;j<=K;j++)
+			f[i][j]=(f[i-1][j]-f[i-1][j-1]+p)%p;
+		d[i]=f[i][i];
+	}
+}
+void Gcd(long long x,long long y){
+	if (!y){
+		gcd=x;
+		return;
+	}
+	Gcd(y,x%y);
+}
+long long C(long long s,long long x,int y){
+	static long long z;
+	b[1]*=x;
+	for (int i=2;i<=b[0];i++)
+		(b[i]*=x)+=b[i-1]/MOD,b[i-1]%=MOD;
+	while (b[b[0]]>=MOD)b[b[0]+1]=b[b[0]]/MOD,b[b[0]++]%=MOD;
+	for (int i=b[0];i>1;i--)
+		b[i-1]+=b[i]%y*MOD,b[i]/=y;
+	b[1]/=y;
+	while (!b[b[0]])b[0]--;
+	z=0;
+	for (int i=b[0];i;i--)
+		z=(z*MOD+b[i])%p;
+	return quick(z,s);
+}
+long long did(long long x){
+	static long long s;
+	s=0;
+	b[0]=b[1]=1;
+	for (int i=0;i<=K&&x>=i;i++)
+		(s+=C(d[i],x+1-i,i+1))%=p;
+	return s;
+}
+void work(){
+	if (n-m<=100000){
+		for (;m<=n;m++)
+			ans=(ans+pow(m,K))%p;
+	}else
+		pre(),ans=(did(n)-did(m-1)+p)%p;
+}
+simpson 积分
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#define eps 1e-9
+#include<cmath>
+using namespace std;
+typedef long double ld;
+bool jian(ld a,ld b){
+	return abs(a-b)<eps;
+}
+ld f(ld x){
+}
+ld simpson(ld l,ld r,ld fl,ld fr,ld fmid){
+	return (fl+fr+fmid*4)*((r-l)/6);
+}
+ld area(ld l,ld r,ld mid,ld fl,ld fr,ld fmid,ld s){
+	ld midl,midr;
+	ld fmidl,fmidr,sl,sr;
+	midl=(l+mid)/2,midr=(mid+r)/2;
+	fmidl=f(midl),fmidr=f(midr);
+	sl=simpson(l,mid,fl,fmidl,fmid),sr=simpson(mid,r,fmid,fmidr,fr);
+	return jian(sl+sr,s)?s:area(l,mid,midl,fl,fmid,fmidl,sl)+area(mid,r,midr,fmid,fr,fmidr,sr);
+}
+ld get(ld l,ld r){
+	ld mid;
+	ld fl,fr,fmid;
+	mid=(l+r)/2;
+	fl=f(l),fr=f(r),fmid=f(mid);
+	return area(l,r,mid,fl,fr,fmid,simpson(l,r,fl,fr,fmid));
+}
+线段求交：（两点式）
+ld cross(point a,point b,point c){
+	return (b-a)*(c-a);
+}
+point intersection(line a,line b){
+	static ld u,v;
+	u=cross(a.s,a.e,b.s),v=cross(a.e,a.s,b.e);
+	return (b.s*v+b.e*u)/(u+v);
+}
+两圆交点：（旋转）
+void circleintersection(circle a,circle b){
+	double len=dis(a.p,b.p);
+	if (len<=a.r+b.r){
+		double w=acos((sqr(len)+sqr(a.r)-sqr(b.r))/(2*len*a.r));
+		point c=b.p-a.p;
+		d[++tot]=rotate(c/len*a.r,w)+a.p;
+		d[++tot]=rotate(c/len*a.r,-w)+a.p;
+	}
+}
+半平面交：
+
+struct node1{
+	point p;
+	int bz;
+}d[N];
+struct node{
+	point s,t;
+	ld w;
+	int bz;
+}b[N];
+
+point jiao(node a,node b){
+	static ld K1,B1,K2,B2,x;
+	K1=(a.s.y-a.t.y)/(a.s.x-a.t.x),B1=a.s.y-K1*a.s.x;
+	K2=(b.s.y-b.t.y)/(b.s.x-b.t.x),B2=b.s.y-K2*b.s.x;
+	x=(B2-B1)/(K1-K2);
+	return point(x,K1*x+B1);
+}
+bool on(point a,node b){
+	return cross(b.s,b.t,a)>=0;
+}
+bool jian(int n){
+	static int l,r;
+	static point A;
+	if (n==1)return 1;
+	l=1,r=0;
+	for (int i=1;i<=top;i++)
+	if (b[i].bz<=n){
+		if (r-l+1<2){
+			d[++r].bz=i;
+			if (r-l+1<=2)d[r].p=jiao(b[d[r-1].bz],b[i]);
+		}else{
+			while (r-l+1>=2&&!on(d[r].p,b[i]))r--;
+			while (r-l+1>=2&&!on(d[l+1].p,b[i]))l++;
+			if (l==r&&!on(jiao(b[d[l].bz],b[i]),b[d[l+1].bz]))return 0;
+			d[++r].bz=i,d[r].p=jiao(b[d[r-1].bz],b[i]);
+			if (r-l+1>2&&!on(d[r].p,b[d[l].bz]))r--;
+		}
+	}
+	return 1;
+}
+凸包：
+l=0,r=0,b[0]=a[0];
+for (int i=1;i<top;i++)
+	if (a[i]!=a[i-1]){
+		while (r-l>0&&cross(b[r-1],b[r],a[i])<=0)r--;
+		b[++r]=a[i];
+	}
+bool bz=1;
+while (bz){
+	bz=0;
+	while (r-l>1&&cross(b[r-1],b[r],b[l])<=0)r--,bz=1;
+	while (r-l>1&&cross(b[r],b[l],b[l+1])<=0)l++,bz=1;
+}
+旋转卡壳：
+void work(){
+	static int y;
+	y=l+1;
+	for (int i=l;i<=r;i++){
+		while (cross1(d[i],d[inc(i)],d[y])<cross1(d[i],d[inc(i)],d[inc(y)]))y=inc(y);
+		ans=max(ans,dis(d[i],d[y]));
+	}
+}
+圆反演：
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#include<cmath>
+#define N 1000
+#define R 30
+using namespace std;
+typedef long double ld;
+const ld pi=acos(-1);
+ld sqr(ld x){
+	return x*x;
+}
+struct point{
+	ld x,y;
+	point(ld X=0,ld Y=0){x=X,y=Y;}
+}p;
+struct circle{
+	point p;
+	ld r;
+}c;
+struct line{
+	point s,t;
+}l;
+ld operator*(point a,point b){return a.x*b.y-a.y*b.x;}
+point operator/(point a,ld b){return point(a.x/b,a.y/b);}
+point operator*(point a,ld b){return point(a.x*b,a.y*b);}
+point operator-(point a,point b){return point(a.x-b.x,a.y-b.y);}
+point operator+(point a,point b){return point(a.x+b.x,a.y+b.y);}
+point rotate(point a,ld w){
+	return point(a.x*cos(w)-a.y*sin(w),a.x*sin(w)+a.y*cos(w));
+}
+ld dis(point a,point b){
+	return sqrt(sqr(a.x-b.x)+sqr(a.y-b.y));
+}
+point circlecenter(point a,point b,point c){
+	static ld A1,B1,C1,A2,B2,C2;
+	A1=2*(b.x-a.x),B1=2*(b.y-a.y),C1=(sqr(b.x)+sqr(b.y)-sqr(a.x)-sqr(a.y));
+	A2=2*(c.x-a.x),B2=2*(c.y-a.y),C2=(sqr(c.x)+sqr(c.y)-sqr(a.x)-sqr(a.y));
+	return point((C1*B2-C2*B1)/(A1*B2-A2*B1),(A1*C2-A2*C1)/(A1*B2-A2*B1));
+}
+point ptop(point a){
+	ld s=sqrt(sqr(a.x)+sqr(a.y));
+	ld s1=sqr(R)/s;
+	return a/s*s1;
+}
+circle ctoc(circle a){
+	ld s=sqrt(sqr(a.p.x)+sqr(a.p.y));
+	ld s1=s-a.r;
+	ld s2=sqr(R)/s1;
+	ld s3=sqr(R)/s;
+	a.p=ptop(a.p);
+	a.r=s2-s3;
+	return a;
+}
+line ctol(circle a){
+	line b;
+	b.s=ptop(a.p*2);
+	b.t=rotate(b.s,pi/2)+b.s;
+	return b;
+}
+circle ltoc(line a){
+	circle b;
+	point A=ptop(a.s),B=ptop(a.t);
+	b.p=circlecenter(A,B,point(0,0));
+	b.r=dis(A,b.p);
+	return b;
+}
+最小圆覆盖：
+point circumcenter(point a,point b,point c){
+	ld A1=2*(b.x-a.x),B1=2*(b.y-a.y),C1=(sqr(b.x)+sqr(b.y)-sqr(a.x)-sqr(a.y));
+	ld A2=2*(c.x-a.x),B2=2*(c.y-a.y),C2=(sqr(c.x)+sqr(c.y)-sqr(a.x)-sqr(a.y));
+	return point((C1*B2-B1*C2)/(A1*B2-B1*A2),(A1*C2-C1*A2)/(A1*B2-B1*A2));
+}
+void min_cover_circle(int n,point* a){
+	random_shuffle(a+1,a+n+1);
+	c=circle(a[1],0);
+	for (int i=2;i<=n;i++)
+		if (dis(a[i],c.p)>c.r+eps){
+			c=circle(a[i],0);
+			for (int j=1;j<i;j++)
+				if (dis(a[j],c.p)>c.r+eps){
+					c=circle((a[i]+a[j])/2,dis(a[i],a[j])/2);
+					for (int k=1;k<j;k++)
+						if (dis(a[k],c.p)>c.r+eps)
+							c.p=circumcenter(a[i],a[j],a[k]),c.r=dis(c.p,a[i]);
+				}
+		}
+}
+解同余方程组：
+int a[N],p[N];
+int n;
+int gcd(int a,int b){
+	return !b?a:gcd(b,a%b);
+}
+int ext_gcd(int a,int b,int&x,int&y){
+	static int tmp,gcd;
+	if (!b){
+		x=1,y=0;
+		return a;
+	}
+	gcd=ext_gcd(b,a%b,x,y);
+	tmp=x;
+	x=y;
+	y=tmp-a/b*y;
+	return gcd;
+}
+int merge(int a1,int p1,int a2,int p2){
+	static int k,x,y,gcd;
+	gcd=ext_gcd(p1,p2,x,y);
+	if ((a2-a1)%gcd)return -1;
+	k=p2/gcd;
+	return a1+p1*((x*(a2-a1)%k+k)%k);
+}
+bool CLE(int*a,int*p,int n){
+	for (int i=1;i<n;i++){
+		a[0]=merge(a[0],p[0],a[i],p[i]);
+		if (a[0]==-1)return 0;
+		p[0]=p[0]*p[i]/gcd(p[0],p[i]);
+	}
+	return 1;
+}
+组合数取模：
+ll c[N][N];
+ll p[N],a[N],b[N];
+int n,m,P,cnt;
+ll calc(ll x,ll y,ll MOD){
+	static ll s;
+	s=1;
+	while (y){
+		if (y&1)(s*=x)%=MOD;
+		(x*=x)%=MOD,y>>=1;
+	}
+	return s;
+}
+ll dfs(ll x,int i,int sig){
+	ll s;
+	if (x<p[i])return c[i][x];
+	cnt+=sig*(s=x/p[i]);
+	return dfs(s,i,sig)*calc(c[i][b[i]-1],x/b[i],b[i])%b[i]*c[i][x%b[i]]%b[i];
+}
+ll gcd(ll a,ll b){
+	return !b?a:gcd(b,a%b);
+}
+ll ext_gcd(ll a,ll b,ll&x,ll&y){
+	static ll tmp,gcd;
+	if (!b){
+		x=1,y=0;
+		return a;
+	}
+	gcd=ext_gcd(b,a%b,x,y);
+	tmp=x;
+	x=y;
+	y=tmp-a/b*y;
+	return gcd;
+}
+ll ni(ll a,ll b){
+	static ll gcd,x,y,k;
+	gcd=ext_gcd(a,b,x,y);
+	k=b/gcd;
+	return (x%k+k)%k;
+}
+ll merge(ll a1,ll p1,ll a2,ll p2){
+	static ll gcd,x,y,k;
+	gcd=ext_gcd(p1,p2,x,y);
+	k=p2/gcd;
+	if ((a2-a1)%k)return -1;
+	return a1+p1*(((a2-a1)*x%k+k)%k);
+}
+int C(ll n,ll m,ll P){
+	static int s,top;
+	static ll 
+	s=sqrt(P)+1;
+	top=0;
+	for (int i=2;i<=s;i++)
+		if (!(P%i)){
+			p[++top]=i,b[top]=1;
+			while (!(P%i))P/=i,b[top]*=i;
+			c[top][0]=1;
+			for (int j=1;j<=b[top];j++)
+				c[top][j]=(j%i)?c[top][j-1]*j%b[top]:c[top][j-1];
+		}
+	for (int i=1;i<=top;i++){
+		cnt=0;
+		a1=dfs(n,i,1),a2=dfs(m,i,-1),a3=dfs(n-m,i,-1);
+		a[i]=a1*ni(a2,b[i])%b[i]*ni(a3,b[i])%b[i]*calc(p[i],cnt,b[i])%b[i];
+	}
+	for (int i=2;i<=top;i++){
+		a[1]=merge(a[1],b[1],a[i],b[i]);
+		if (a[1]==-1)return 0;
+		b[1]*=b[i]/gcd(b[i],b[1]);
+	}
+	return a[1];
+}
+AC自动机：
+void ins(int s,char*s1,int l){
+	if (l==len1){
+		tri[s].sum=1;
+		return;
+	}
+	static int ss;
+	if (!tri[s].son[ss=s1[l]-'0'])
+		tri[s].son[ss]=++L;
+	ins(tri[s].son[ss],s1,l+1);
+}
+void bfs(){
+	static int l,r,x;
+	l=0,r=1,d[1]=0;
+	while (l<r){
+		++l;
+		for (int i=0;i<10;i++)
+			if (tri[d[l]].son[i]){
+				x=tri[d[l]].fail;
+				while (!tri[x].son[i]&&x)x=tri[x].fail;
+				d[++r]=tri[d[l]].son[i];
+				if (tri[x].son[i]!=d[r])
+					tri[d[r]].fail=tri[x].son[i];
+			}
+	}
+}
+manachar：
+S[0]='$';
+for (int i=1;i<=n;i++){
+	S[i*2-1]='#';
+	scanf(" %c",&S[i*2]);
+}
+S[n*2+1]='#',S[n*2+2]='%';
+n=(n+1)*2;
+x=0;
+for (int i=1;i<=n;i++){
+	if (k[x]+x>=i)
+		k[i]=min(k[x+x-i],k[x]+x-i);
+	while (S[k[i]+i+1]==S[i-k[i]-1])k[i]++;
+	f[k[i]]+=1;
+	if (k[i]+i>x+k[x])x=i;
+}
+扩展kmp：
+n=strlen(s);
+x=0;
+for (int i=1;i<n;i++){
+	if (x+k[x]-1>=i)
+		k[i]=min(k[i-x],x+k[x]-i);
+	else
+		k[i]=0;
+	while (k[i]+i<n&&s[k[i]+i]==s[k[i]])k[i]++;
+	if (i+k[i]==n)a[++a[0]]=k[i];
+	ans=max(ans,k[i]-(k[i]+i==n));
+	if (k[i]+i>x+k[x])x=i;
+}
+sam：
+void add(int last,int c){
+	static int v,u,up,up1;
+	v=++L;
+	u=last;
+	tri[v].len=tri[u].len+1;
+	for (;u&&!tri[u].son[c];u=tri[u].fail)tri[u].son[c]=v;
+	if (!u)tri[v].fail=1;
+	else{
+		up=tri[u].son[c];
+		if (tri[up].len==tri[u].len+1)tri[v].fail=up;
+		else{
+			up1=++L;
+			tri[up1]=tri[up];
+			tri[up1].len=tri[u].len+1;
+			tri[up].fail=tri[v].fail=up1;
+			for (;u&&tri[u].son[c]==up;u=tri[u].fail)tri[u].son[c]=up1;
+		}
+	}
+	lst=v;
+}
+scanf(" %s",S+1);
+len=strlen(S+1);
+lst=1,L=1;
+for (int i=1;i<=len;i++)add(lst,S[i]-'a');
+回文树：
+struct node{
+	int son[27];
+	int fail,len,sum;
+}tri[M];
+char S[M];
+void pre(){
+	S[0]=-1;
+	tri[1].len=-1;
+	tri[0].fail=1;
+	lst=0;
+	L=1;
+}
+int getfail(int x){
+	while (S[N]!=S[N-tri[x].len-1])x=tri[x].fail;
+	return x;
+}
+void add(){
+	static int y;
+	y=getfail(lst);
+	if (!tri[y].son[S[N]-'a']){
+		tri[++L].fail=tri[getfail(tri[y].fail)].son[S[N]-'a'],tri[L].len=tri[y].len+2;
+		tri[y].son[S[N]-'a']=L;
+	}
+	lst=tri[y].son[S[N]-'a'];
+	tri[lst].sum++;
+}
+len=strlen(S+1);
+for (N=1;N<=len;N++)add();
+
+SAP
+int n,m,s,t,ss,tt,ans,flow;
+int g[N],a[N][3],help[4][2],vh[N],dis[N],di[N],pre[N],his[N];
+char map[100][100];
+void ins(int x,int y,int z){
+    a[++sum][0]=y,a[sum][1]=z,a[sum][2]=g[x],g[x]=sum;
+    a[++sum][0]=x,a[sum][1]=0,a[sum][2]=g[y],g[y]=sum;
+}
+void clear(){
+    for (int i=0;i<N;i++)
+        vh[i]=dis[i]=0;
+}
+void sap(int s,int t){
+    static int x,argue,mn,k;
+    static bool p;
+    clear();
+    flow=0;
+    argue=MAXN,x=s;
+    vh[0]=t+1;
+    while (dis[s]<=t+1){
+        p=0;
+        his[x]=argue;
+        for (int i=di[x];i;i=a[i][2])
+            if (a[i][1]&&dis[x]==dis[a[i][0]]+1){
+                p=1,argue=min(argue,a[i][1]),di[x]=i,pre[a[i][0]]=x;
+                x=a[i][0];
+                if (x==t){
+                    flow+=argue;
+                    while (x!=s){
+                        x=pre[x];
+                        a[di[x]][1]-=argue;
+                        a[di[x]^1][1]+=argue;
+                    }
+                    argue=MAXN;
+                }
+                break;
+            }
+        if (!p){
+            if (!(--vh[dis[x]]))break;
+            mn=t+2;
+            for (int i=g[x];i;i=a[i][2])
+                if (a[i][1]&&dis[a[i][0]]<mn)
+                    mn=dis[a[i][0]],k=i;
+            ++vh[dis[x]=++mn];
+            di[x]=k;
+            if (x!=s)
+                x=pre[x],argue=his[x];
+        }
+    }
+}
+
+sigma(C(n,r)*r^k)(d((1+x)^n)/dx^k)
+f[0][0]=1;
+for (int i=0;i<k;i++)
+	for (int j=0;j<=k;j++)
+		if (f[i][j]){
+			int b=j,c=n-j;
+			(f[i+1][b]+=(long long)f[i][j]*b%MOD)%=MOD;
+			(f[i+1][b+1]+=(long long)f[i][j]*c%MOD)%=MOD;
+		}
+long long ans=0;
+for (int i=0;i<=k;i++)
+	(ans+=(long long)calc(2,n-i)*f[k][i]%MOD)%=MOD;
+printf("%d\n",(int)ans);

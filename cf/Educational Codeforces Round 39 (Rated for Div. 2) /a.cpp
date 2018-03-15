@@ -1,0 +1,13 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#define N 10000
+using namespace std;
+int a[N];
+int n;
+int main(){
+	scanf("%d",&n);
+	for (int i=1;i<=n;i++)scanf("%d",&a[i]),a[i]=abs(a[i])+a[i-1];
+	printf("%d\n",a[n]);
+	return 0;
+}

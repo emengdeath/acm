@@ -1,0 +1,78 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#include<cmath>
+#define eps 1e-12
+using namespace std;
+struct point{
+	double x,y;
+	point(double X=0,double Y=0){x=X,y=Y;}
+	void read(){
+		scanf("%lf %lf",&x,&y);
+	}
+}a[N],d[N];
+int n;
+point operator-(point a,point b){
+	return point(a.x-b.x,a.y-b.y);
+}
+point operator+(point a,point b){
+	return point(a.x+b.x,a.y+b.y);
+}
+point operator*(double a,point b){
+	return point(b.x*a,b.y*a);
+}
+point operator*(point b,double a){
+	return point(b.x*a,b.y*a);
+}
+point operator/(point a,double b){
+	return point(a.x/b,a.y/b);
+}
+bool operator==(point a,point b){
+	return a.x==b.x&&a.y==b.y;
+}
+double operator*(point a,point b){
+	return a.x*b.y-a.y*b.x;
+}
+double multi(point a,point b,point c){
+	return (b-a)*(c-a);
+}
+double area(point a,point b,point c){
+	return fabs(multi(a,b,c));
+}
+point intersection(line a,line b){
+	return ((a.s-a.t)*(b.s*b.t)-(b.s-b.t)*(a.s*a.t))/((b.s-b.t)*(a.s-a.t));
+}
+bool cmp(const point&a,const point&b){
+	if (a.y==b.y)return a.x<b.x;
+	return a.y<b.y;
+}
+int main(){
+	freopen("poj2451.in","r",stdin);
+	scanf("%d",&n);
+	for (int i=1;i<=n;i++)
+		a[i].read();
+	sort(a+1,a+n+1,cmp);
+	int tot=1;
+	d[1]=a[1];
+	for (int i=2;i<=n;i++){
+		while (tot>=2&&mult(d[tot-1],d[tot],a[i])<0)tot--;
+		d[++tot]=a[i];
+	}
+	int len=tot;
+	d[++tot]=a[n-1];
+	for (int i=n-2;i;i--){
+		while (top!=len&&mult(d[tot-1],d[tot],a[i])<0)tot--;
+		d[++tot]=i;
+	}
+	for (int i=1;i<=tot;){
+		if (area(d[i],d[i%tot+1],d[(i%tot+1)%tot+1])){
+			printf("NO\n");
+			return 0;
+		}
+		while (!(area(d[i],d[i%tot+1],d[(i%tot+1)%tot+1]))&&i<=tot)i=i%tot+1;
+		if (i==tot)break;
+		i=i%tot+1;
+	}
+	printf("YES\n");
+	return 0;
+}

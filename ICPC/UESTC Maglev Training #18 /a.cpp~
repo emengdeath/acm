@@ -1,0 +1,19 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+int maxn;
+int n;
+struct node{
+	int h,r,t;
+	bool check(int x){
+		x=x%h;
+		if (r<=t)
+			return x<=r||t<=x;
+		else
+			return x<=r&&x>=t;
+	}
+}a[100];
+int main(){
+
+}

@@ -1,0 +1,54 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+#define N 1000100
+using namespace std;
+char s[N];
+long long a[27][27];
+long long ansx,ansy;
+int n;
+int b[27],help[27];
+bool bz[27];
+int main(){
+	freopen("consonant.in","r",stdin);
+	freopen("consonant.out","w",stdout);
+	scanf(" %s",s+1);
+	n=strlen(s+1);
+	bz['a'-'a']=1;
+	bz['e'-'a']=1;
+	bz['i'-'a']=1;
+	bz['o'-'a']=1;
+	bz['u'-'a']=1;
+	bz['w'-'a']=1;
+	bz['y'-'a']=1;
+	for (int i=0;i<26;i++)
+		if (!bz[i]){
+			b[++b[0]]=i;
+		}
+	help[1]=1;
+	for (int i=2;i<=26;i++)help[i]=help[i-1]*2;
+	for (int i=1;i<n;i++){
+		a[s[i]-'a'][s[i+1]-'a']++;
+	}
+	for (int i=help[b[0]]*2-1;i>=0;i--){
+		long long v=0;
+		if (i==1){
+			int yy;
+			yy=0;
+		}
+		for (int j=1;j<=b[0];j++)
+			for (int k=1;k<=b[0];k++)
+				if (((i&help[j])>0)^((i&help[k])>0)){
+					v+=a[b[j]][b[k]];	
+				}
+		if (v>ansx)ansx=v,ansy=i;
+	}
+	for (int i=1;i<=n;i++){
+		for (int j=1;j<=b[0];j++)
+			if (b[j]+'a'==s[i]&&(ansy&help[j])>0)
+					s[i]=b[j]+'A';
+		printf("%c",s[i]);
+	}
+	return 0;
+}

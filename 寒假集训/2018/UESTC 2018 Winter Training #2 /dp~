@@ -1,0 +1,12 @@
+#!/bin/bash
+while true; do
+    ./data > data.in
+    ./std <data.in >std.out
+    ./Todobe <data.in >Todobe.out
+    if diff std.out Todobe.out; then
+        printf "AC\n"
+    else
+        printf "Wa\n"
+        exit 0
+    fi
+done

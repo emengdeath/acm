@@ -1,0 +1,31 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#include<cmath>
+#define y1 YYY
+using namespace std;
+double x1,y1,x2,y2,x3,y3,R,r;
+double sqr(double x){
+	return x*x;
+}
+double dis(double x,double y,double x1,double y1){
+	return sqrt(sqr(x-x1)+sqr(y-y1));
+}
+int main(){
+	scanf("%lf%lf%lf%lf%lf",&R,&x1,&y1,&x2,&y2);
+	if (x1==x2&&y1==y2){
+		r=R/2;
+		x3=x1,y3=y1+r;
+	}else{
+		double len=dis(x1,y1,x2,y2);
+		if (len<=R){
+			r=(R+len)/2;
+			x3=(x2+x1-(x2-x1)/len*R)/2;
+			y3=(y2+y1-(y2-y1)/len*R)/2;
+		}else{
+			x3=x1,y3=y1,r=R;
+		}
+	}
+	printf("%.10f %.10f %.10f",x3,y3,r);
+	return 0;
+}

@@ -1,0 +1,69 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#define N 100000
+#include<cstring>
+using namespace std;
+int a[N+1],d[N+1],f[N+1],b[N+1],sum[N+1],c[N+1];
+int n,T,s;
+void dfs(int x,int y){
+	if (x>b[0]){
+		sum[y]++;
+		return;	
+	}
+	dfs(x+1,y);
+	dfs(x+1,y*b[x]);
+}
+void dfs1(int x,int y){
+	if (x>b[0]){
+		s+=sum[y]*f[y];
+		return;	
+	}
+	dfs1(x+1,y);
+	dfs1(x+1,y*b[x]);
+}
+int main(){
+	scanf("%d",&T);
+	f[1]=1;
+	for (int i=2;i<=N;i++){
+		if (!a[i])
+			f[d[a[i]=++d[0]]=i]=-1;
+		for (int j=1;j<=a[i];j++)
+			if ((long long)d[j]*i>N)break;
+			else{
+				a[i*d[j]]=j;
+				if (j!=a[i])
+					f[i*d[j]]=-f[i];
+			}
+	}
+	while (T--){
+		scanf("%d",&n);
+		memset(sum,0,sizeof(sum));
+		for (int i=1;i<=n;i++){
+			int x;
+			scanf("%d",&x);
+			c[i]=x;
+			b[0]=0;
+			while (x!=1){
+				if (b[b[0]]!=d[a[x]])b[++b[0]]=d[a[x]];
+				x/=d[a[x]];
+			}
+			dfs(1,1);
+		}
+		long long ans=0;
+		for (int i=1;i<=n;i++){
+			int x=c[i];
+			s=0;
+			b[0]=0;
+			while (x!=1){
+				if (b[b[0]]!=d[a[x]])b[++b[0]]=d[a[x]];
+				x/=d[a[x]];
+			}
+			dfs1(1,1);
+			if (c[i]==1)s--;
+			ans+=s*(n-s-1);
+		}
+		printf("%I64d\n",(long long)n*(n-1)*(n-2)/6-ans/2);
+	}
+	return 0;
+}

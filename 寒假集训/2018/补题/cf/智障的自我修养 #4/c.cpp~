@@ -1,0 +1,7 @@
+sudo git clone https://github.com/3dem/relion.git
+sudo cd relion
+sudo mkdir build
+sudo cd build.
+sudo cmake -DCMAKE_INSTALL_PREFIX=/home/emengdeath/tools
+sudo make -j4
+sudo make install

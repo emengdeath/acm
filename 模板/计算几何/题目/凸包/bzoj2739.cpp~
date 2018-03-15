@@ -1,0 +1,94 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#include<cmath>
+#define N 20000
+using namespace std;
+struct point{
+	double x,y;
+	point(double X=0,double Y=0){x=X,y=Y;}
+	void read(){
+		scanf("%lf %lf",&x,&y);
+	}
+}a[N],b[N];
+int n,m;
+struct line{
+	point s,t;
+	line(point S=point(0,0),point T=point(0,0)){
+		s=S,t=T;
+	}
+};
+point operator-(point a,point b){
+	return point(a.x-b.x,a.y-b.y);
+}
+point operator+(point a,point b){
+	return point(a.x+b.x,a.y+b.y);
+}
+point operator*(double a,point b){
+	return point(b.x*a,b.y*a);
+}
+point operator*(point b,double a){
+	return point(b.x*a,b.y*a);
+}
+point operator/(point a,double b){
+	return point(a.x/b,a.y/b);
+}
+bool operator==(point a,point b){
+	return a.x==b.x&&a.y==b.y;
+}
+double operator*(point a,point b){
+	return a.x*b.y-a.y*b.x;
+}
+double dotcross(point a,point b){
+	return a.x*b.x+a.y*b.y;
+}
+double multi(point a,point b,point c){
+	return (b-a)*(c-a);
+}
+double area(point a,point b,point c){
+	return fabs(multi(a,b,c));
+}
+double sqr(double x){
+	return x*x;
+}
+double dis(point a,point b){
+	return sqrt(sqr(a.x-b.x)+sqr(a.y-b.y));
+}
+void anticlockwise_sort(point&a,int n){
+	for (int i=1;i+2<=n;i++)
+		if (multi(a[i],a[i+1],a[i+2])<0){
+			reverse(a+1,a+n+1);
+			return;
+		}
+}
+double point_line_dis(point p,line l){
+	return area(p,l.s,l.t)/dis(l.s,l.t);
+}
+double point_seg_dis(point p,line seg){
+	if (dotcross(p-seg.s,seg.t-seg.s)<0)return dis(seg.s,p);
+	if (dotcross(p-seg.t,seg.s-seg.t)<0)return dis(seg.t,p);
+	return point_line_dis(p,seg);
+}
+double polygon_dis(point*a,int n,point*b,int m){
+	anticlockwise_sort(a,n);
+	anticlockwise_sort(b,m);
+	int ymin=1,ymax=1;
+	for (int i=1;i<=n;i++)if (a[i].y<a[ymin].y||(a[i].y==a[ymin].y&&a[i].x<a[ymin].x))ymin=i;
+	for (int i=1;i<=m;i++)if (b[i].y>b[ymax].y||(b[i].y==b[ymax].y&&b[i].x>b[ymax].x))ymax=i;
+	double ans=dis(a[1],b[1]);
+	for (int i=1;i<=n;i++){
+		while (area(a[ymin%n+1],a[ymin],b[ymax])>area(a[ymin%n+1],a[ymin],b[ymax%m+1]))ymax=ymax%m+1;
+		ans=min(ans,min(point_seg_dis(b[ymax],line(a[ymin],a[ymin%n+1])),point_seg_dis(a[ymin],line(b[ymax],b[ymax%m+1]))));
+	}
+	return ans;
+}
+int main(){
+	while (1){
+		scanf("%d %d",&n,&m);
+		if (!n&&!m)break;
+		for (int i=1;i<=n;i++)a[i].read();
+		for (int i=1;i<=m;i++)b[i].read();
+		printf("%.6f\n",polygon_dis(a,n,b,m));
+	}
+	return 0;
+}

@@ -1,0 +1,147 @@
+1.判断点在多边形内外：
+射线法：
+统一水平向右；
+a.水平边不做考虑;b.如果穿过顶点,则该顶点为所属边上纵坐标较大者才计数;c.交于边上也计数.
+
+2.直线交点：
+point intersection(line a,line b){
+	return ((a.s-a.t)*(b.s*b.t)-(b.s-b.t)*(a.s*a.t))/((b.s-b.t)*(a.s-a.t));
+}
+3.快速判断多条线段是否有交：
+a.将所有线段的端点按X坐标从小到大、Y坐标从小到大排序。
+b.若P为线段s的左端点，则插入（若该点在已插入线段顺时针方向，则放在前面，反之放在后面），否则删除。插入和删除时要判断该线段是否和相邻位置的线段有交。（平衡树）
+
+4.凸包（可保留边上的点）
+bool cmp(const point&a,const point&b){
+	if (a.y==b.y)return a.x<b.x;
+	return a.y<b.y;
+}
+int tot=1;
+d[1]=a[1];
+for (int i=2;i<=n;i++)
+	if (a[i]!=a[i-1]){
+		while (tot>=2&&multi(d[tot-1],d[tot],a[i])<0)tot--;（<=为不保留边上的点）
+		d[++tot]=a[i];
+	}
+if (n>1){
+	int len=tot;
+	d[++tot]=a[n-1];
+	for (int i=n-2;i;i--)
+	if (a[i]!=a[i+1]){
+		while (len!=tot&&multi(d[tot-1],d[tot],a[i])<0)tot--;
+		d[++tot]=a[i];
+	}
+	(一开始的点会出现2次)
+}
+bool sig=0;
+if (n<6){
+	printf("NO\n");
+	continue;
+}
+for (int i=1;i+3<=tot;i++)
+	if (multi(d[i],d[i+1],d[i+2])&&multi(d[i+1],d[i+2],d[i+3])){（判断是否出现一条边上只有2个点）
+		sig=1;
+		printf("NO\n");
+		break;
+	}
+if (sig)continue;
+printf("YES\n");(判断是不是为稳定凸包)
+
+5.最小圆覆盖
+point circumcenter(point a,point b,point c){
+	ld A1=2*(b.x-a.x),B1=2*(b.y-a.y),C1=(sqr(b.x)+sqr(b.y)-sqr(a.x)-sqr(a.y));
+	ld A2=2*(c.x-a.x),B2=2*(c.y-a.y),C2=(sqr(c.x)+sqr(c.y)-sqr(a.x)-sqr(a.y));
+	return point((C1*B2-B1*C2)/(A1*B2-B1*A2),(A1*C2-C1*A2)/(A1*B2-B1*A2));
+}（求三角形外接圆圆心）
+void min_cover_circle(int n,point* a){
+	random_shuffle(a+1,a+n+1);
+	c=circle(a[1],0);
+	for (int i=2;i<=n;i++)
+		if (dis(a[i],c.p)>c.r+eps){
+			c=circle(a[i],0);
+			for (int j=1;j<i;j++)
+				if (dis(a[j],c.p)>c.r+eps){
+					c=circle((a[i]+a[j])/2,dis(a[i],a[j])/2);
+					for (int k=1;k<j;k++)
+						if (dis(a[k],c.p)>c.r+eps)
+							c.p=circumcenter(a[i],a[j],a[k]),c.r=dis(c.p,a[i]);
+				}
+		}
+}
+6.求三角形内切圆圆心
+point incircle(point a,point b,point c){
+	double A=dis(b,c),B=dis(a,c),C=dis(a,b);
+	return point((A*a.x+B*b.x+C*c.x)/(A+B+C),(A*a.y+B*b.y+C*c.y)/(A+B+C));	
+}
+7.求点关于直线的对称点
+point symmetry_point(point a,line l){
+	double A=l.t.y-l.s.y,B=l.s.x-l.t.x,C=(l.s.y-l.t.y)*l.s.x+(l.t.x-l.s.x)*l.s.y;
+	return point((sqr(B)-sqr(A))*a.x-2*A*B*a.y-2*A*C,(sqr(A)-sqr(B))*a.y-2*A*B*a.x-2*B*C)/(sqr(A)+sqr(B));
+}
+8.以原点为基点逆时针转点
+point rotate(point a,double w){
+	return point(a.x*cos(w)-a.y*sin(w),a.x*sin(w)+a.y*cos(w));
+}
+9.旋转卡壳
+void work(){
+	static int y;
+	y=l+1;
+	for (int i=l;i<=r;i++){
+		while (cross1(d[i],d[inc(i)],d[y])<cross1(d[i],d[inc(i)],d[inc(y)]))y=inc(y);
+		ans=max(ans,dis(d[i],d[y]));
+	}
+}
+10.求最大三角形面积：n^2
+构建凸包后，固定i，j然后k一路扫过去，直到不能再大为止，更新答案，然后移动j，k继续后移。（固定i、j后面积具有单峰性）
+11.求凸包上各点的最远点（决策单调性）
+bool cmp(int now,int pos1,int pos2){
+	long double len1=dis(a[now],a[pos1]),len2=dis(a[now],a[pos2]);
+	if (pos1<now||pos1>now+n)len1=-len1;
+	if (pos2<now||pos2>now+n)len2=-len2;
+	return len1<len2;
+}
+void work(int l,int r,int L,int R){
+	int mid=(l+r)/2;
+	int x=L;
+	for (int i=L;i<=R;i++)if (cmp(mid,x,i))x=i;
+	f[mid]=x;
+	if  (l==r)return;
+	work(l,mid,L,x),work(mid+1,r,x,R);
+}
+work(1,n,1,n+n);(注意最后编号要小于等于n)
+12.求两凸包最近距离：
+void anticlockwise_sort(point*a,int n){
+	for (int i=1;i<=n;i++){
+		double tmp=multi(a[i],a[i%n+1],a[(i%n+1)%n+1]);
+		if (tmp<0){
+			reverse(a+1,a+n+1);
+			return;
+		}else
+		if (tmp>0)return;
+	}
+}
+double point_line_dis(point p,line l){
+	return area(p,l.s,l.t)/dis(l.s,l.t);
+}
+double point_seg_dis(point p,line seg){
+	if (dotcross(p-seg.s,seg.t-seg.s)<=0)return dis(seg.s,p);
+	if (dotcross(p-seg.t,seg.s-seg.t)<=0)return dis(seg.t,p);
+	return point_line_dis(p,seg);
+}
+double seg_seg_dis(line a,line b){
+	return min(point_seg_dis(b.s,a),min(point_seg_dis(b.t,a),min(point_seg_dis(a.s,b),point_seg_dis(a.t,b))));
+}
+double polygon_dis(point*a,int n,point*b,int m){
+	anticlockwise_sort(a,n);
+	anticlockwise_sort(b,m);
+	int ymin=1,ymax=1;
+	for (int i=1;i<=n;i++)if (a[i].y<a[ymin].y)ymin=i;
+	for (int i=1;i<=m;i++)if (b[i].y>b[ymax].y)ymax=i;
+	double ans=dis(a[1],b[1]);
+	for (int i=1;i<=n;i++){
+		while (multi(a[ymin%n+1],b[ymax],a[ymin])<multi(a[ymin%n+1],b[ymax%m+1],a[ymin]))ymax=ymax%m+1; （注意是multi！！！！）
+		ans=min(ans,seg_seg_dis(line(a[ymin],a[ymin%n+1]),line(b[ymax],b[ymax%m+1])));
+		ymin=ymin%n+1;
+	}
+	return ans;
+}

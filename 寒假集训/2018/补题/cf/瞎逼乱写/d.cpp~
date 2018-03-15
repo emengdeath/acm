@@ -1,0 +1,33 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#define N 10000
+using namespace std;
+int a[N],l[N],r[N],len[2];
+int n,ans;
+int main(){
+	scanf("%d",&n);
+	for (int i=1;i<=n;i++){
+		scanf("%d",&a[i]),a[i]--;
+		l[i]=l[i-1];
+		if (!a[i])l[i]++;
+	}
+	ans=l[n];
+	for (int i=n;i;i--){
+		r[i]=r[i+1]+a[i];
+		ans=max(ans,r[i]+l[i-1]);
+	}
+	
+	for (int i=1;i<=n;i++){
+		int x[2]=0;
+		for (int j=i;j<=n;j++){
+			if (!a[j])x[0]++;
+			else
+				x[1]++;
+			x[0]=max(x[0],x[1]);
+			ans=max(ans,x[0]+l[i-1]+r[j+1]);
+		}
+	}
+	printf("%d",ans);
+	return 0;
+}

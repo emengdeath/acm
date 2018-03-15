@@ -1,0 +1,49 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#define N 200000
+using namespace std;
+int n;
+int b[N];
+bool bz[N];
+struct node{
+	int x,y;
+}a[N];
+bool cmp(const node&a,const node&b){return a.x<b.x||(a.x==b.x&&a.y>b.y);}
+bool cmp1(int x,int y){
+	return a[x].y<a[y].y||(a[x].y==a[y].y&&a[x].x<a[y].x);
+}
+bool check(long long cost){
+	long long all=0;
+	int l=1;
+	for (int i=1;i<=n;i++)bz[i]=0;
+	for (int i=1;i<=n;i++){
+		if (bz[i])continue;
+		while (l<=n&&b[l]<=i)l++;
+		while (l<=n&&i!=b[l]&&all+a[i].x-a[b[l]].y-cost>0){
+			if (all-cost-a[b[l]].y>0)return 0;
+			all+=a[b[l]].x;
+			bz[b[l++]]=1;
+			while (l<=n&&b[l]<=i)l++;
+		}
+		if (all-cost-a[i].y>0)return 0;
+		all+=a[i].x;
+	}
+	return 1;
+}
+int main(){
+	freopen("c.in","r",stdin);
+	while (scanf("%d",&n)!=EOF){
+		for (int i=1;i<=n;i++)scanf("%d %d",&a[i].x,&a[i].y),b[i]=i;
+		sort(a+1,a+n+1,cmp);
+		sort(b+1,b+n+1,cmp1);
+		long long l=0,r=1e10,mid,s=1e10;
+		while (l<=r){
+			if (check(mid=(l+r)/2))r=mid-1,s=min(s,mid);
+			else
+				l=mid+1;
+		}
+		printf("%lld\n",s);
+	}
+	return 0;
+}
