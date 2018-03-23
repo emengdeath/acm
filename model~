@@ -1,7 +1,32 @@
+linux下对拍
+while true; do  
+./data>j.in 
+./did<j.in>did.out   
+./j <j.in>j.out 
+if diff j.out did.out; then 
+printf AC 
+else  
+echo WA  
+exit 0  
+fi 
+done 
 gprof 查看热点：
 g++ -pg -g  -o test test.cc
 ./test   //会生成gmon.out
 gprof ./test > prof.log
+使用指针数组来分配紧凑空间:
+int *l[16];
+int d[N];
+l[1]=&d[0];
+for (int i=2;i<=15;i++)
+	l[i]=(l[i-1])+(1<<(i-1))
+使用直接：
+int*di=l[i];
+di[x]=y...
+容斥公式：
+留下压位后1的个数为奇数的：系数公式为-1^(i-1)*(1<<(i-1))
+cout输出小数自动补零：
+cout<<setiosflags(ios::fixed)<<setprecision(5)<<1.2345<<endl;
 2-SAT
 #include<cstdio>
 #include<algorithm>
@@ -782,3 +807,9 @@ long long ans=0;
 for (int i=0;i<=k;i++)
 	(ans+=(long long)calc(2,n-i)*f[k][i]%MOD)%=MOD;
 printf("%d\n",(int)ans);
+prufer数列：
+（1）无根树转化为prufer序列。
+首先定义无根树中度数为1的节点是叶子节点。
+找到编号最小的叶子并删除，序列中添加与之相连的节点编号，重复执行直到只剩下2个节点。
+（2）prufer序列转化为无根树。设点集V={1,2,3,...,n}，每次取出prufer序列中最前面的元素u，在V中找到编号最小的没有在prufer序列中出现的元素v，给u，v连边然后分别删除，最后在V中剩下两个节点，给它们连边。最终得到的就是无根树。
+一个有趣的推广是，n个节点的度依次为D1, D2, …, Dn的无根树共有   (n-2)! / [ (D1-1)!(D2-1)!..(Dn-1)! ]  个，因为此时Prüfer编码中的数字i恰好出现Di-1次。
