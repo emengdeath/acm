@@ -1,0 +1,65 @@
+Problem a. Little E in Petr Village(128M,1s)
+	Little E comes to Petr Village, where there will be a marathon competition lasting for several days. Most importantly, the prize is little E's favorite French Brie cheeses.
+	Petr Village is a tree structure consisting of n stations. The distance between two connected stations is 1. We will number 1 to n for each station, and each station i will initially have ai cheeses. According to regulations, players can start from any station x, go to any station y along the shortest path, and at the end, they can get all the cheeses from all stations along the path x to y(including x, y). However, in order to make the player run along a road with a proper length(not too long nor too short), the village chief decided that the runners could only choose to run along a road whose length is between l and r. Besides, because the game will take m days, to make it funnier, ahead of the game of ith day,the village chef will choose to increase the number of cheeses in all the stations along the route from ui to vi by wi. And we assume that,all the cheeses will not be disappeared during the marathon,even if the player take them out.
+	Since little E has a strong yearning for French Bire cheeses, he will sum the number sumi of cheeses harvested for every legal runs at ith day. (Because of the small E's desire for freshness, if there are two situations,he runs from x to y, or from y to x, it will only be counted 1 time) But due to too many situations, he can't calculate it before each day's game starts. Now he gives it to you,a tourist. He knows that you have had a brilliant performance on CF. Although it is in a bad state recently, you can certainly tell him the result before he warms up. For convenience, you only need to output each sumi after it modulo 1e9+7.
+input:
+The first line contains four integers:n,m,l,r
+The second line contains n integers:ai,the number of cheeses stored at the ith station at the beginning.
+Each of the next n-1 lines contains two integers:ui,vi,there is a road between ui and vi.
+Each of the next m lines contains three integers:ui,vi,wi,village chef will choose to add wi cheeses in all the stations along the path from ui to vi.
+4 4 1 3
+1 2 3 4
+1 2
+2 3
+3 4
+1 2 0
+1 2 1
+1 4 3
+2 2 2
+output:
+There will be m lines,for the ith line:a integer sumi.
+40
+48
+96
+106
+Explanation:
+	1st Day:the cheeses in each station:{1,2,3,4},the cheeses in each legal situation:
+	1->2=3,1->3=6,1->4=10,2->3=5,2->4=9,3->4=7，the ans1 is 40
+	2nd Day:the cheeses in each station:{2,3,3,4},the cheeses in each legal situation:
+	1->2=5,1->3=8,1->4=12,2->3=6,2->4=10,3->4=7，the ans2 is 48
+	3rd Day:the cheeses in each station:{5,6,6,7},the cheeses in each legal situation:
+	1->2=11,1->3=17,1->4=24,2->3=12,2->4=19,3->4=13，the ans3 is 96
+	4th Day:the cheeses in each station:{5,8,6,7},the cheeses in each legal situation:
+	1->2=13,1->3=19,1->4=26,2->3=14,2->4=21,3->4=13, the ans4 is 106
+Constraints
+1≤n,m≤1e5
+0≤l≤r≤1e5	
+0≤ai≤1e5
+1≤ui,vi≤n
+0≤wi≤1e5
+Problem b.Eating!Umaru Doma(128M,1s)
+Umaru Doma likes to drink kola and potato chips together,especial having them alternately.Of course, Umaru's snacks are all bought by her brother Taihei Doma. And today, her dearest brother can't bear her coquetry again and buys snacks for her again.However, to make Umaru eat the snacks in moderation, Taihei require Umaru to obey the rules as follows:
+The snacks contain kola and potato chips.We use 'k' to stand for kola and 'p' to stand for potato chips. Initailly, Taihei will divide them to n groups.The only allowed groups are "k","p","kk","pp","kp" and "pk".Then,Umaru will put all the groups together in turns,in any orders(For example:"kp","p",Umaru can put them together as "kpp" or "pkp",but not "ppk"(you can't reorder the snacks in the same group)).After that, Umaru will begin to eat the snacks,but she could only choose two neighboring similar snacks and eat one of them.(For example,"kkp" will become "kp" but not "kk" after Umaru's eating.)
+Though Umaru can't enjoy having snacks alternately, she'd like to have as many snacks as possible. Now, it's your chance to help the lovely girl!
+input:
+The first line of the input contains an integer T denoting the number of test cases. The description of T test cases follows.
+The first line of each test case contains an integer n.
+The second line of each test case contains n space-separated strings s1, s2, ..., sn.
+2
+2
+kp pk
+4
+k p k p
+Output
+For each test case, output a single line containing one integer corresponding to the maximum possible snacks Umaru can eat.
+1
+2
+Explanation
+Testcase 1:
+You can put "kp" and "pk" together as "kppk",and Umaru have a potato chips.
+Testcase 2:
+You can put them together as "kkpp", and Umaru have a potato chips and a kola.
+Constraints
+1≤T≤1e5
+1≤n≤1e5
+sum of n over all test cases won't exceed 1e6
